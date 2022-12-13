@@ -1,40 +1,58 @@
-# base image
+### base image ###
 ARG PYTHON_VERSION=3.11.0
 
 FROM python:${PYTHON_VERSION} as base
 
-ENV PYTHONFAULTHANDLER=on
-ENV PYTHONUNBUFFERED=on
+ARG ENV=none
+ARG POETRY_HOME="/opt/poetry"
+ARG POETRY_VERSION=1.3.1
+ARG PYSETUP_PATH="/opt/pysetup"
+
+ENV ENV=${ENV}
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONHASHSEED=random
+#ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+#ENV PIP_NO_CACHE_DIR=1
+#ENV PIP_DEFAULT_TIMEOUT=100
+ENV POETRY_HOME=${POETRY_HOME}
+ENV POETRY_VERSION=${POETRY_VERSION}
+ENV POETRY_NO_ANSI=1
+ENV POETRY_NO_INTERACTION=1
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV PYSETUP_PATH=${PYSETUP_PATH}
+ENV VENV_PATH="$PYSETUP_PATH/.venv"
+
+# prepend poetry and venv to path
+ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+
+### builder image ###
+FROM base as builder
 
 # install required packages
 #RUN apt-get update
-#RUN apt-get install -y curl
-#RUN apt-get update  \
-#    && apt-get install --no-install-recommends -y  \
-#    curl  \
-#    build-essential
+#RUN apt-get install --no-install-recommends -y curl build-essential
 
-# builder image
-FROM base as builder
-
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-ENV PIP_NO_CACHE_DIR=1
-ENV PIP_DEFAULT_TIMEOUT=100
-ENV POETRY_HOME="/opt/poetry"
-ENV POETRY_VERSION=1.3.1
-ENV POETRY_NO_INTERACTION=1
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-ENV PYSETUP_PATH="/opt/pysetup"
-ENV VENV_PATH="/opt/pysetup/.venv"
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
-#RUN pip install "poetry==$POETRY_VERSION"
+# install poetry - respects $POETRY_VERSION & $POETRY_HOME
 RUN curl -sSL https://install.python-poetry.org | python3 -
-#ENV PATH="/root/.poetry/bin:$PATH"
-#RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-#RUN poetry config virtualenvs.create false
-#RUN poetry install
 
+# copy project requirement files here to ensure they will be cached.
 WORKDIR $PYSETUP_PATH
-COPY poetry.lock pyproject.toml ./
-RUN poetry install --no-dev
+COPY pyproject.toml ./
+
+# install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
+RUN poetry install $(test $ENV == prod && echo "--without dev,tests,docs") --sync
+
+
+### local image ###
+FROM base as local
+
+ARG ENV=local
+
+ENV ENV=${ENV}
+
+COPY --from=builder $PYSETUP_PATH $PYSETUP_PATH
+COPY /src /src
+
+CMD ["uvicorn", "src:app", "--host", "0.0.0.0", "--port", "80"]
