@@ -30,6 +30,10 @@ ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 ### builder image ###
 FROM base as builder
 
+ARG ENV
+
+ENV ENV=${ENV}
+
 # install required packages
 #RUN apt-get update
 #RUN apt-get install --no-install-recommends -y curl build-essential
@@ -42,13 +46,13 @@ WORKDIR $PYSETUP_PATH
 COPY pyproject.toml ./
 
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
-RUN poetry install $(test $ENV == prod && echo "--without dev,tests,docs") --sync
+RUN poetry install $(test ${ENV} != prod && echo "--with dev,tests,docs -vvv") --sync
 
 
 ### local image ###
 FROM base as local
 
-ARG ENV=local
+ARG ENV
 
 ENV ENV=${ENV}
 

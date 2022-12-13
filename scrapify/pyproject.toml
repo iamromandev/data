@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "scrapy"
+name = "scrapify"
 version = "0.0.1"
 description = ""
 authors = ["roman"]
