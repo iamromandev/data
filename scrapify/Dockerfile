@@ -59,5 +59,5 @@ ENV ENV=${ENV}
 COPY --from=builder $PYSETUP_PATH $PYSETUP_PATH
 COPY /src /src
 
-#CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
-CMD [ "python3", "./src/main.py" ]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
+#CMD [ "python3", "./src/main.py" ]
