@@ -3,12 +3,12 @@ ARG PYTHON_VERSION=3.11.0
 
 FROM python:${PYTHON_VERSION} as base
 
-ARG ENV=none
+ARG ENV
 ARG POETRY_HOME="/opt/poetry"
 ARG POETRY_VERSION=1.3.1
 ARG PYSETUP_PATH="/opt/pysetup"
 
-ENV ENV=${ENV}
+ENV ENV=$ENV
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONFAULTHANDLER=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -32,7 +32,7 @@ FROM base as builder
 
 ARG ENV
 
-ENV ENV=${ENV}
+ENV ENV=$ENV
 
 # install required packages
 #RUN apt-get update
@@ -46,7 +46,7 @@ WORKDIR $PYSETUP_PATH
 COPY pyproject.toml ./
 
 # install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
-RUN poetry install $(test ${ENV} != prod && echo "--with dev,tests,docs -vvv") --sync
+RUN poetry install $(test $ENV != prod && echo "--with dev,tests,docs -vvv") --sync
 
 
 ### local image ###
@@ -54,7 +54,7 @@ FROM base as local
 
 ARG ENV
 
-ENV ENV=${ENV}
+ENV ENV=$ENV
 
 COPY --from=builder $PYSETUP_PATH $PYSETUP_PATH
 COPY /src /src
