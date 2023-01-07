@@ -1,0 +1,13 @@
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: local
+      args:
+        ENV: local
+
+
+
+    
