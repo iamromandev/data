@@ -1,3 +1,13 @@
+# system
+.PHONY: clean
+clean:
+	docker system prune -a --force
+	docker volume prune --force
+
+.PHONY: ps
+ps:
+	docker ps -a
+
 # local
 .PHONY: build
 build:
@@ -33,10 +43,4 @@ down-dev:
 restart-dev:
 	make down-dev
 	make up-dev
-
-# system
-.PHONY: clean
-clean:
-	docker system prune -a --force
-	docker volume prune --force
 
