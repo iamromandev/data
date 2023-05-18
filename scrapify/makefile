@@ -6,7 +6,7 @@ clean:
 
 .PHONY: ps
 ps:
-	docker ps -a
+	docker compose ps -a
 
 # local
 .PHONY: build
@@ -24,23 +24,10 @@ down:
 .PHONY: restart
 restart:
 	make down
+	make build
 	make up
 
-# dev
-.PHONY: build-dev
-build-dev:
-	docker-compose -f docker-compose.dev.yml build
-
-.PHONY: up-dev
-up-dev:
-	docker-compose -f docker-compose.dev.yml up -d
-
-.PHONY: down-dev
-down-dev:
-	docker-compose -f docker-compose.dev.yml down
-
-.PHONY: restart-dev
-restart-dev:
-	make down-dev
-	make up-dev
-
+# deploy
+.PHONY: deploy
+deploy:
+	python src/manage.py tailwind build
