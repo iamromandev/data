@@ -156,7 +156,7 @@ USE_TZ = True
 # for initial keeping static files
 STATIC_URL = 'src/static/'
 # for storing collected static files
-STATIC_ROOT = BASE_DIR.joinpath('src/staticfiles') if DEBUG else '/home/iamromandev/public_html/staticfiles'
+STATIC_ROOT = BASE_DIR.joinpath('src/staticfiles') if DEBUG else '/home/iamromandev/public_html/data/scrapify/staticfiles'
 # for collecting images also
 STATICFILES_DIRS = [
     BASE_DIR.joinpath('src/static'),
