@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "scrapify"
+name = "scrapify-project"
 version = "0.0.1"
 description = ""
 authors = ["Roman <iamromandev@gmail.com>"]
